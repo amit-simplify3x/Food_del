@@ -37,6 +37,11 @@ import AddNewBatchModal from "../components/DispatchPlanner/modals/AddNewBatchMo
 import ComponentTabs from "../components/DispatchPlanner/ComponentTabs";
 import DpSubComponentTabs from "../components/DispatchPlanner/DpSubComponentTab";
 
+
+
+
+
+
 const DpLayout = ({ children, component }) => {
   const [tabArr, setTabArr] = useState([
     { name: "Packing Plan", link: "/dispatchplanningapi/dp", key: "scheduled" },
@@ -59,6 +64,18 @@ const DpLayout = ({ children, component }) => {
     filteredData: [],
   });
 
+  const [mflData,setMflData] = useState({
+    data: [],
+    filteredData: [],
+  });
+  const [coPackerData,setCoPackerData] = useState({
+    data: [],
+    filteredData: [],
+  });
+  const [directBillingData,setDirectBillingData] = useState({
+    data: [],
+    filteredData: [],
+  });
   const [openEditMotModal, setOpenEditMotModal] = useState({
     open: false,
     data: null,
@@ -93,6 +110,9 @@ const DpLayout = ({ children, component }) => {
   const [activeTab, setActiveTab] = useState("mfl_inventory");
   const [showSubComponentTabs, setShowSubComponentTabs] = useState(false); // New state for visibility
   const [totalDataLenght,setTotalDataLenght]=useState();
+  // const[mflData,setMflData]=useState();
+  // const[coPackerData,setCoPackerData]=useState();
+  // const[directBillingData,setDirectBillingData]=useState();
   const [tabData, setTabData] = useState({
     scheduled: { data: [], filteredData: [] },
     dispatch: { data: [], filteredData: [] },
@@ -101,6 +121,7 @@ const DpLayout = ({ children, component }) => {
   let countMflInevetory=0;
   let countCoPackers = 0;
   let countDirectBilling = 0;
+
   const getDemandPlanningData = (data) => {
    
     if (selectedDay === dayOptions.today ) {
@@ -116,17 +137,39 @@ const DpLayout = ({ children, component }) => {
       {
         status: component,
         ...data,
-        sub_tab: activeTab,
+       
       },
       setLoading,
       (data) => {
         // console.log('data 75',data?.data)
-        const totalLength = data?.data?.length || 0;
+        
+       const totalLength = data?.data?.length || 0;
         setData({
           data: data || [],
-          filteredData: data?.data || [],
+          filteredData: data.data.mfl_inventory || [],
         });
-           
+        const v1=data.data.mfl_inventory
+        const v2=data.data.direct_billing
+        const v3=data.data.co_packer
+        console.log("line 150",v1)
+        console.log("line 151",v2)
+        console.log("line 152",v3)
+        setMflData({
+          data:data||[],
+          filteredData:v1||[]
+        })
+        setCoPackerData({
+          data:data||[],
+          filteredData:v3||[]
+        })
+        setDirectBillingData({
+          data:data||[],
+          filteredData:v2||[]
+        })
+        console.log("line 129",mflData)
+        console.log("line 130",coPackerData)
+        console.log("line 131",directBillingData)
+       
         setContainers((prevContiners) =>
           prevContiners.map((container) =>
             container.key === activeTab
@@ -134,17 +177,32 @@ const DpLayout = ({ children, component }) => {
               : container
           )
         );
-
+    
         setShowSubComponentTabs(true);
+      //   setContainers((prevContainers) =>
+      //     prevContainers.map((container) => {
+      //         if (container.key === 'mfl_inventory') {
+      //             return { ...container, count: mfl.length };
+      //         } else if (container.key === 'co_packers') {
+      //             return { ...container, count: coPacker.length };
+      //         } else if (container.key === 'direct_billing') {
+      //             return { ...container, count: direct.length };
+      //         } else if (container.key === activeTab) {
+      //             // return { ...container, count: totalLength };
+      //         } else {
+      //             // return container;
+      //         }
+      //     })
+      // );
       }
     );
   };
-
+ 
   const getAllDPData = (data) => {
     asynchronous.getAllDPO(
       {
         ...data,
-        sub_tab: activeTab,
+       
       },
       setLoading,
       (data) => {
@@ -323,7 +381,7 @@ const DpLayout = ({ children, component }) => {
       {
         status: component,
         ...data,
-        sub_tab: activeTab,
+        
       },
       setLoading,
       (data) => {
@@ -422,8 +480,18 @@ const DpLayout = ({ children, component }) => {
 
   useEffect(() => {
     if (activeTab && Object.keys(applyFiltersData).length > 0) {
-        console.log("line 419 subtab",selectedDay)
-        getDemandPlanningData({ ...applyFiltersData, sub_tab: activeTab });
+        // console.log("line 419 subtab",selectedDay)
+        // getDemandPlanningData({ ...applyFiltersData, sub_tab: activeTab });
+        if(activeTab==='mfl_inventory'){
+          setData(
+           mflData);
+        }
+        else if(activeTab==='co_packers'){
+          setData(coPackerData);
+        }
+        else{
+          setData(directBillingData);
+        }
     }
   }, [activeTab]);
 
@@ -599,3 +667,4 @@ const DpLayout = ({ children, component }) => {
 };
 
 export default DpLayout;
+
