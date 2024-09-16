@@ -37,11 +37,6 @@ import AddNewBatchModal from "../components/DispatchPlanner/modals/AddNewBatchMo
 import ComponentTabs from "../components/DispatchPlanner/ComponentTabs";
 import DpSubComponentTabs from "../components/DispatchPlanner/DpSubComponentTab";
 
-
-
-
-
-
 const DpLayout = ({ children, component }) => {
   const [tabArr, setTabArr] = useState([
     { name: "Packing Plan", link: "/dispatchplanningapi/dp", key: "scheduled" },
@@ -64,15 +59,15 @@ const DpLayout = ({ children, component }) => {
     filteredData: [],
   });
 
-  const [mflData,setMflData] = useState({
+  const [mflData, setMflData] = useState({
     data: [],
     filteredData: [],
   });
-  const [coPackerData,setCoPackerData] = useState({
+  const [coPackerData, setCoPackerData] = useState({
     data: [],
     filteredData: [],
   });
-  const [directBillingData,setDirectBillingData] = useState({
+  const [directBillingData, setDirectBillingData] = useState({
     data: [],
     filteredData: [],
   });
@@ -95,7 +90,7 @@ const DpLayout = ({ children, component }) => {
   const [filters, setFilters] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedDay, setSelectedDay] = useState(dayOptions.tomorrow);
-  const [selectedDateTemp, setSelectedDateTemp] = useState()
+  const [selectedDateTemp, setSelectedDateTemp] = useState();
   const [openAddBatchModal, setOpenAddBatchModal] = useState(false);
   const [batchModalData, setBatchModalData] = useState({});
   const [confirmModalData, setConfirmModalData] = useState({});
@@ -109,7 +104,7 @@ const DpLayout = ({ children, component }) => {
   // console.log('totol data',containers[0].count+containers[1].count+containers[2].count);
   const [activeTab, setActiveTab] = useState("mfl_inventory");
   const [showSubComponentTabs, setShowSubComponentTabs] = useState(false); // New state for visibility
-  const [totalDataLenght,setTotalDataLenght]=useState();
+  const [totalDataLenght, setTotalDataLenght] = useState();
   // const[mflData,setMflData]=useState();
   // const[coPackerData,setCoPackerData]=useState();
   // const[directBillingData,setDirectBillingData]=useState();
@@ -118,126 +113,167 @@ const DpLayout = ({ children, component }) => {
     dispatch: { data: [], filteredData: [] },
     all: { data: [], filteredData: [] },
   });
-  let countMflInevetory=0;
+  let countMflInevetory = 0;
   let countCoPackers = 0;
   let countDirectBilling = 0;
-
+const [searchData,setSearchData]=useState({})
   const getDemandPlanningData = (data) => {
-   
-    if (selectedDay === dayOptions.today ) {
-     getTodayData(data);
+    // console.log("line 119 get", data.activeTab);
+    const value = data.activeTab;
+    if (selectedDay === dayOptions.today) {
+      getTodayData(data);
       return;
     } else if (component === demandPlannerTabs.all) {
       getAllDPData(data);
       return;
     }
 
-    
     asynchronous.getDemandPlanning(
       {
         status: component,
         ...data,
-       
       },
       setLoading,
       (data) => {
         // console.log('data 75',data?.data)
-        
-       const totalLength = data?.data?.length || 0;
-        setData({
-          data: data || [],
-          filteredData: data.data.mfl_inventory || [],
-        });
-        const v1=data.data.mfl_inventory
-        const v2=data.data.direct_billing
-        const v3=data.data.co_packer
-        console.log("line 150",v1)
-        console.log("line 151",v2)
-        console.log("line 152",v3)
+
+        const totalLength = data?.data?.length || 0;
+        if (value === "mfl_inventory") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.mfl_inventory || [],
+          });
+        } else if (value === "co_packers") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.co_packer || [],
+          });
+        } else if (value === "direct_billing") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.direct_billing || [],
+          });
+        } else {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.mfl_inventory || [],
+          });
+        }
+
+        const v1 = data?.data?.mfl_inventory;
+        const v2 = data?.data?.direct_billing;
+        const v3 = data?.data?.co_packer;
+
         setMflData({
-          data:data||[],
-          filteredData:v1||[]
-        })
+          data: data || [],
+          filteredData: v1 || [],
+        });
         setCoPackerData({
-          data:data||[],
-          filteredData:v3||[]
-        })
+          data: data || [],
+          filteredData: v3 || [],
+        });
         setDirectBillingData({
-          data:data||[],
-          filteredData:v2||[]
-        })
-        console.log("line 129",mflData)
-        console.log("line 130",coPackerData)
-        console.log("line 131",directBillingData)
-       
-        setContainers((prevContiners) =>
-          prevContiners.map((container) =>
-            container.key === activeTab
-              ? { ...container, count: totalLength }
-              : container
-          )
-        );
-    
+          data: data || [],
+          filteredData: v2 || [],
+        });
+
+        // setContainers((prevContiners) =>
+        //   prevContiners.map((container) =>
+        //     container.key === activeTab
+        //       ? { ...container, count: mflData.filteredData.length }
+        //       : container
+
+        //   )
+        // );
+
         setShowSubComponentTabs(true);
-      //   setContainers((prevContainers) =>
-      //     prevContainers.map((container) => {
-      //         if (container.key === 'mfl_inventory') {
-      //             return { ...container, count: mfl.length };
-      //         } else if (container.key === 'co_packers') {
-      //             return { ...container, count: coPacker.length };
-      //         } else if (container.key === 'direct_billing') {
-      //             return { ...container, count: direct.length };
-      //         } else if (container.key === activeTab) {
-      //             // return { ...container, count: totalLength };
-      //         } else {
-      //             // return container;
-      //         }
-      //     })
-      // );
       }
     );
   };
- 
+
   const getAllDPData = (data) => {
+    const value = data.activeTab;
+
     asynchronous.getAllDPO(
       {
         ...data,
-       
       },
       setLoading,
       (data) => {
         // console.log('data',data?.data)
         const totalLength = data?.data?.length || 0;
-        setData({
+        // setData({
+        //   data: data || [],
+        //   filteredData: data?.data || [],
+        // });
+        if (value === "mfl_inventory") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.mfl_inventory || [],
+          });
+        } else if (value === "co_packers") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.co_packer || [],
+          });
+        } else if (value === "direct_billing") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.direct_billing || [],
+          });
+        } else {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.mfl_inventory || [],
+          });
+        }
+        // console.log("line 237 actual data", data);
+        const v1 = data?.data?.mfl_inventory;
+        const v2 = data?.data?.direct_billing;
+        const v3 = data?.data?.co_packer;
+
+        setMflData({
           data: data || [],
-          filteredData: data?.data || [],
+          filteredData: v1 || [],
         });
+        setCoPackerData({
+          data: data || [],
+          filteredData: v3 || [],
+        });
+        setDirectBillingData({
+          data: data || [],
+          filteredData: v2 || [],
+        });
+
         setShowSubComponentTabs(true);
-        setContainers((prevContiners) =>
-          prevContiners.map((container) =>
-            container.key === activeTab
-              ? { ...container, count: totalLength }
-              : container
-          )
-        );
+        // setContainers((prevContiners) =>
+        //   prevContiners.map((container) =>
+        //     container.key === activeTab
+        //       ? { ...container, count: totalLength }
+        //       : container
+        //   )
+        // );
       }
     );
   };
   const getAll = (data) => {};
 
   const applyFilters = (data) => {
+    setContainers((prevContainers) =>
+      prevContainers.map((container) => ({
+        ...container,
+        count: 0,
+      }))
+    );
 
-        setContainers((prevContainers) =>
-          prevContainers.map((container) => ({
-            ...container,
-            count: 0,
-          }))
-        );
-      
-
-    setSelectedDateTemp(selectedDay)
+    setSelectedDateTemp(selectedDay);
     setApplyFiltersData(data);
-    getDemandPlanningData(data);
+    const dataWithActiveTab = {
+      ...data,
+      activeTab: activeTab,
+    };
+
+    getDemandPlanningData(dataWithActiveTab);
   };
 
   // console.log("line 126",component)
@@ -263,7 +299,7 @@ const DpLayout = ({ children, component }) => {
   };
 
   const selectAllHandler = (e) => {
-    const newData = data?.data?.data?.map((obj) => ({
+    const newData = data?.filteredData?.map((obj) => ({
       ...obj,
       confirm_for_tomorrows_dispatch: e.target.checked,
     }));
@@ -277,9 +313,9 @@ const DpLayout = ({ children, component }) => {
   };
 
   const selectHandler = (e, code) => {
-    const newData = data?.data?.data?.map((obj) => {
+    const newData = data?.filteredData?.map((obj) => {
       if (obj.id === code) {
-        console.log(code);
+        // console.log(code);
         obj.confirm_for_tomorrows_dispatch = e.target.checked;
       }
       return obj;
@@ -300,6 +336,7 @@ const DpLayout = ({ children, component }) => {
         getDemandPlanningData({
           ...data,
           status: component,
+          activeTab,
         });
       }
     });
@@ -317,6 +354,7 @@ const DpLayout = ({ children, component }) => {
           getDemandPlanningData({
             status: component,
             ...data.getData,
+            activeTab,
           });
         }
       }
@@ -355,7 +393,12 @@ const DpLayout = ({ children, component }) => {
         }, 3000);
         setData({ data: [], filteredData: [] });
         setConfirmModalData({ data: [], filteredData: [] });
-        getDemandPlanningData(data);
+        const dataWithActiveTab = {
+          ...data,
+          activeTab: activeTab,
+        };
+
+        getDemandPlanningData(dataWithActiveTab);
       }
     });
   };
@@ -367,39 +410,79 @@ const DpLayout = ({ children, component }) => {
         setOpenConfirmModal(false);
         setShowSuccessModal(true);
         const timer = setTimeout(() => {
-          setShowSuccessModal(false);
+          setShowSuccessModal(false)
           clearTimeout(timer);
         }, 3000);
-        getDemandPlanningData({ status: component, ...obj });
+        getDemandPlanningData({ status: component, ...obj,activeTab});
         setConfirmModalData({ data: [], filteredData: [] });
       }
     });
   };
 
   const getTodayData = (data) => {
+    const value = data.activeTab;
+
     asynchronous.getArchivealData(
       {
         status: component,
         ...data,
-        
       },
       setLoading,
       (data) => {
         // console.log('data',data)
         const totalLength = data?.data?.length || 0;
-        setData({
-          data: data?.data || [],
-          filteredData: data?.data || [],
+        // setData({
+        //   data: data?.data || [],
+        //   filteredData: data?.data || [],
+        // });
+        if (value === "mfl_inventory") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.mfl_inventory || [],
+          });
+        } else if (value === "co_packers") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.co_packer || [],
+          });
+        } else if (value === "direct_billing") {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.direct_billing || [],
+          });
+        } else {
+          setData({
+            data: data || [],
+            filteredData: data?.data?.mfl_inventory || [],
+          });
+        }
+        // console.log("line 237 actual data", data);
+        const v1 = data?.data?.mfl_inventory;
+        const v2 = data?.data?.direct_billing;
+        const v3 = data?.data?.co_packer;
+
+        setMflData({
+          data: data || [],
+          filteredData: v1 || [],
+        });
+        setCoPackerData({
+          data: data || [],
+          filteredData: v3 || [],
+        });
+        setDirectBillingData({
+          data: data || [],
+          filteredData: v2 || [],
         });
         setShowSubComponentTabs(true);
-        setContainers((prevContiners) =>
-            prevContiners.map((container) =>
-              container.key === activeTab
-                ? { ...container, count: totalLength }
-                : container
-            )
-          );
-       
+        // setContainers((prevContiners) =>
+        //     prevContiners.map((container) =>{
+        //       container.key === activeTab
+        //         ? { ...container, count: totalLength }
+        //         : container
+
+        //     }
+        //     )
+        //   );
       }
     );
   };
@@ -410,17 +493,21 @@ const DpLayout = ({ children, component }) => {
       {
         status: demandPlannerTabs.addNewBatch,
         ...data,
-        sub_tab: activeTab,
       },
       setLoading,
       (data) => {
         if (data) {
-          // console.log(data)
+          // console.log("line 420 modal", data);
           setOpenAddBatchModal(true);
+          const v1 = data?.data?.mfl_inventory;
+          const v2 = data?.data?.direct_billing;
+          const v3 = data?.data?.co_packer;
+          const combineData = [...v1, ...v2, ...v3];
           setBatchModalData({
             data: data || [],
-            filteredData: data?.data || [],
+            filteredData: combineData || [],
           });
+          // console.log("line 496 ", batchModalData);
         }
       }
     );
@@ -428,11 +515,21 @@ const DpLayout = ({ children, component }) => {
 
   const openConfirmModalHandler = () => {
     setOpenConfirmModal(true);
+    const combinedData = [
+      ...mflData.filteredData,
+      ...coPackerData.filteredData,
+      ...directBillingData.filteredData,
+    ];
+console.log("line 516",combinedData);
+
     if (component === demandPlannerTabs.scheduled) {
-      setConfirmModalData(data);
+      setConfirmModalData({ data: {}, filteredData: combinedData });
       return;
     }
-    const newData = data?.data?.data?.filter(
+
+    // console.log("combine data line 441", combinedData);
+
+    const newData = combinedData?.filter(
       (obj) => obj.confirm_for_tomorrows_dispatch
     );
     setConfirmModalData({
@@ -445,7 +542,7 @@ const DpLayout = ({ children, component }) => {
   };
 
   const confirmForDispatch = (data) => {
-    console.log(data);
+    // console.log(data);
   };
 
   const saveSplitBatches = (data) => {
@@ -457,6 +554,7 @@ const DpLayout = ({ children, component }) => {
         getDemandPlanningData({
           ...data.getData,
           status: selectedDay === dayOptions.today ? "batchRelease" : component,
+          activeTab,
         });
         setOpenMergeBatchModal({ open: false });
       }
@@ -472,26 +570,45 @@ const DpLayout = ({ children, component }) => {
         getDemandPlanningData({
           ...data.getData,
           status: selectedDay === dayOptions.today ? "batchRelease" : component,
+          activeTab,
         });
         setOpenMergeBatchModal({ open: false });
       }
     });
   };
 
+  const searchHandler = (e) => {
+    const {name, value} = e.target;
+    console.log(data?.filteredData)
+    let arr = [...data?.filteredData];
+    const newObj = {
+        ...searchData,
+        [name]:value
+    };
+    // console.log(newObj);
+    setSearchData(newObj);
+    (() => {
+        Object.keys(newObj).forEach(key => {
+            arr = arr.filter(el => `${el[key]}`.toLowerCase().includes(`${newObj[key]}`.toLowerCase()))
+        })
+        setData({
+            ...data,
+            filteredData:arr
+        })
+    })();
+}
+
   useEffect(() => {
     if (activeTab && Object.keys(applyFiltersData).length > 0) {
-        // console.log("line 419 subtab",selectedDay)
-        // getDemandPlanningData({ ...applyFiltersData, sub_tab: activeTab });
-        if(activeTab==='mfl_inventory'){
-          setData(
-           mflData);
-        }
-        else if(activeTab==='co_packers'){
-          setData(coPackerData);
-        }
-        else{
-          setData(directBillingData);
-        }
+      // console.log("line 419 subtab",selectedDay)
+      // getDemandPlanningData({ ...applyFiltersData, sub_tab: activeTab });
+      if (activeTab === "mfl_inventory") {
+        setData(mflData);
+      } else if (activeTab === "co_packers") {
+        setData(coPackerData);
+      } else {
+        setData(directBillingData);
+      }
     }
   }, [activeTab]);
 
@@ -500,13 +617,21 @@ const DpLayout = ({ children, component }) => {
     // getDemandPlanningData()
     getFilters();
   }, []);
-
+  //  console.log("line 498",mflData.filteredData.length)
+  //  console.log("line 499",coPackerData.filteredData.length)
+  //  console.log("line 500",directBillingData.filteredData.length)
   return (
     <MainLayoutContainer title={"Demand Planning"} subTitle={""}>
       <Tabs
         tabs={tabArr}
         hideBtn={true}
-        numbers={{ ...numbers, [component]: containers[0].count+containers[1].count+containers[2].count}}
+        numbers={{
+          ...numbers,
+          [component]:
+            mflData.filteredData.length +
+              coPackerData.filteredData.length +
+              directBillingData.filteredData.length || 0,
+        }}
       />
       <div className="mx-4">
         <DemandPlannerFilters
@@ -522,20 +647,22 @@ const DpLayout = ({ children, component }) => {
           showOptimizerOutputBtn={component !== demandPlannerTabs.all}
           selectedDay={selectedDay}
           setSelectedDay={setSelectedDay}
-          selectedDateTemp = {selectedDateTemp}
-          setSelectedDateTemp = {setSelectedDateTemp}
+          selectedDateTemp={selectedDateTemp}
+          setSelectedDateTemp={setSelectedDateTemp}
           data={data}
           openAddBatchModal={openNewBatchModal}
           component={component}
           openConfirmModal={openConfirmModalHandler}
           hideTentativeDateRange={component !== demandPlannerTabs.all}
-         
         />
         <div className="">
           {showSubComponentTabs && (
             <DpSubComponentTabs
               tabs={containers}
               activeTab={activeTab}
+              mflData={mflData}
+              coPackerData={coPackerData}
+              directBillingData={directBillingData}
               tabClickHandler={(key) => {
                 setActiveTab(key);
               }}
@@ -566,7 +693,7 @@ const DpLayout = ({ children, component }) => {
               <div className=""></div>
               <DpTable
                 //((selectedDay === dayOptions.today&&component==="scheduled") ? archivalDbHeaders :dpHeaders)
-                leftHeaders={(selectedDateTemp === dayOptions.today 
+                leftHeaders={(selectedDateTemp === dayOptions.today
                   ? archivalDbHeaders
                   : dpHeaders
                 ).left.filter((obj) => {
@@ -577,9 +704,8 @@ const DpLayout = ({ children, component }) => {
                   ) {
                     if (obj.key !== "checkbox") return obj;
                   } else return obj;
-                 
                 })}
-                rightHeaders={(selectedDateTemp === dayOptions.today 
+                rightHeaders={(selectedDateTemp === dayOptions.today
                   ? archivalDbHeaders
                   : dpHeaders
                 ).right.filter((obj) => {
@@ -605,6 +731,7 @@ const DpLayout = ({ children, component }) => {
                 // openViewVerModal={compareData}
                 // disableRowHandler={disableRowHandler}
                 // getData={getPalletData}
+                searchHandler={searchHandler}
                 selectAllHandler={selectAllHandler}
                 selectHandler={selectHandler}
                 selectedDay={selectedDateTemp}
@@ -667,4 +794,5 @@ const DpLayout = ({ children, component }) => {
 };
 
 export default DpLayout;
+
 
